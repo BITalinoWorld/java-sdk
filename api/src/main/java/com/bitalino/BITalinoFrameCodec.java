@@ -1,3 +1,15 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.bitalino;
 
 import java.io.DataInputStream;
@@ -104,14 +116,15 @@ public final class BITalinoFrameCodec {
       BITalinoFrame[] frames = new BITalinoFrame[numberOfSamples];
       byte[] buffer = new byte[totalBytes];
       byte[] bTemp = new byte[1];
-      int i = 0;
+      int sampleCounter = 0;
 
       // parse frames
-      while (i < numberOfSamples) {
+      while (sampleCounter < numberOfSamples) {
         // read number_bytes from buffer
         is.readFully(buffer, 0, totalBytes);
         // let's try to decode the buffer
         BITalinoFrame f = decode(buffer, analogChannels.length, totalBytes);
+        System.out.println("Sample " + sampleCounter + " has sequence " +f.getSequence());
         // if CRC isn't valid, sequence equals -1
         if (f.getSequence() == -1) {
           // we're missing data, so let's wait and try to rebuild the buffer or
@@ -124,8 +137,8 @@ public final class BITalinoFrameCodec {
             f = decode(buffer, analogChannels.length, totalBytes);
           }
         }
-        frames[i] = f;
-        i++;
+        frames[sampleCounter] = f;
+        sampleCounter++;
       }
       return frames;
     } catch (Exception e) {

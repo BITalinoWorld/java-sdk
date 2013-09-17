@@ -4,21 +4,19 @@ bitalino-java-sdk
 Bitalino Java SDK derived from code available from the official website, BITalino.com.
 
 ## Prerequisites ##
-- JDK 7
+- JDK 6 or 7
 - Maven 3.1.0 or newer
+- On Ubuntu, install _libbluetooth-dev_
 
-## Test ##
+## Test with device ##
 
-TODO
 ```
-mvn clean test
+mvn clean install --projects example exec:java
 ```
 
-## Build ##
-```
-mvn clean package
-```
-You'll find the resulting JAR in _${PWD}/target_.
+## Tested on ##
+- Ubuntu 12.04+ with OpenJDK 7 64-bit
+- MacOS X 10.7.5 with Oracle JDK 1.7.0_40 64-bit
 
 ## Trouble-shooting ##
 - Read http://bluecove.org/
