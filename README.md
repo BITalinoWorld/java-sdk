@@ -10,6 +10,11 @@ Bitalino Java SDK derived from code available from the official website, BITalin
 
 ## Test with device ##
 
+The next step is not needed every time.
+```
+mvn clean install
+```
+
 ```
 mvn clean install --projects example exec:java
 ```
