@@ -25,6 +25,9 @@ public class BITalinoExample {
   private static final Logger logger = Logger.getLogger(BITalinoExample.class
       .getName());
 
+  /*
+   * TODO change to your device's MAC address
+   */
   private static final String MAC = "20:13:08:08:15:83";
 
   public static void main(String[] args) throws Throwable {
@@ -33,7 +36,7 @@ public class BITalinoExample {
     // throw new BITalinoException(BITalinoErrorTypes.MACADDRESS_NOT_VALID);
     final String mac = MAC.replace(":", "");
 
-    final int samplerate = 1000;
+    final int samplerate = 100;
     final int[] analogs = { 0 };
     BITalinoDevice device = new BITalinoDevice(samplerate, analogs);
 
@@ -43,13 +46,15 @@ public class BITalinoExample {
     device.open(conn.openInputStream(), conn.openOutputStream());
 
     // get BITalino version
-    logger.info("VERSION: " + device.version());
+    logger.info("Firmware Version: " + device.version());
 
     // start acquisition on predefined analog channels
     device.start();
-
-    // read 300 samples
-    BITalinoFrame[] frames = device.read(10);
+    
+    // read n samples
+    final int numberOfSamplesToRead = 10;
+    logger.info("Reading " + numberOfSamplesToRead + " samples..");
+    BITalinoFrame[] frames = device.read(numberOfSamplesToRead);
     for (BITalinoFrame frame : frames)
       logger.info("FRAME: " + frame.toString());
 
