@@ -22,6 +22,9 @@ import java.nio.ByteBuffer;
  * it.
  */
 public class BITalinoDevice {
+  
+  private static final long SLEEP = 500;
+  
   private final int[] analogChannels;
   private final int samplerate;
   private final int totalBytes;
@@ -70,7 +73,7 @@ public class BITalinoDevice {
       throws BITalinoException {
     try {
       socket = new BITalinoSocket(new DataInputStream(is), os);
-      Thread.sleep(2000);
+      Thread.sleep(SLEEP);
     } catch (Exception e) {
       e.printStackTrace(System.err);
       close();
@@ -125,7 +128,7 @@ public class BITalinoDevice {
   public void stop() throws BITalinoException {
     try {
       socket.write(0);
-      Thread.sleep(2000);
+      Thread.sleep(SLEEP);
       close();
     } catch (Exception e) {
       throw new BITalinoException(BITalinoErrorTypes.BT_DEVICE_NOT_CONNECTED);
