@@ -12,9 +12,9 @@
  */
 package com.bitalino;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public final class BITalinoFrameCodec {
 
@@ -108,7 +108,7 @@ public final class BITalinoFrameCodec {
    * @return decoded frames
    * @see {@link BITalinoFrame}
    */
-  public static BITalinoFrame[] read(final DataInputStream is,
+  public static BITalinoFrame[] read(final InputStream is,
       final int numberOfSamples, final int[] analogChannels,
       final int totalBytes) throws BITalinoException {
 
@@ -121,16 +121,17 @@ public final class BITalinoFrameCodec {
       // parse frames
       while (sampleCounter < numberOfSamples) {
         // read number_bytes from buffer
-        is.readFully(buffer, 0, totalBytes);
+        is.read(buffer, 0, totalBytes);
         // let's try to decode the buffer
         BITalinoFrame f = decode(buffer, analogChannels.length, totalBytes);
-        System.out.println("Sample " + sampleCounter + " has sequence " +f.getSequence());
+        System.out.println("Sample " + sampleCounter + " has sequence "
+            + f.getSequence());
         // if CRC isn't valid, sequence equals -1
         if (f.getSequence() == -1) {
           // we're missing data, so let's wait and try to rebuild the buffer or
           // throw exception
           while (f.getSequence() == -1) {
-            is.readFully(bTemp, 0, 1);
+            is.read(bTemp, 0, 1);
             for (int j = totalBytes - 2; j >= 0; j--)
               buffer[j + 1] = buffer[j];
             buffer[0] = bTemp[0];
@@ -152,7 +153,7 @@ public final class BITalinoFrameCodec {
    * @param data
    *          value to send to BITalino.
    */
-  public static void write(final DataOutputStream os, int data)
+  public static void write(final OutputStream os, final int data)
       throws BITalinoException {
     try {
       os.write(data);
