@@ -44,21 +44,18 @@ final class BITalinoSocket {
       // parse frames
       while (sampleCounter < numberOfSamples) {
         System.out.println("Reading sample " + sampleCounter);
+        final long start = System.currentTimeMillis();
         // read number_bytes from buffer
         dis.readFully(buffer, 0, totalBytes);
         // let's try to decode the buffer
-        long start = System.currentTimeMillis();
         BITalinoFrame f = BITalinoFrameDecoder.decode(buffer,
             analogChannels.length, totalBytes);
-        long elapsed = System.currentTimeMillis() - start;
-        System.out.println("Sample frame decoded in " + elapsed + " ms");
         // if CRC isn't valid, sequence equals -1
         if (f.getSequence() == -1) {
           // we're missing data, so let's wait and try to rebuild the buffer or
           // throw exception
           System.out
               .println("Missed a sequence. Are we too far from BITalino? Retrying..");
-          start = System.currentTimeMillis();
           while (f.getSequence() == -1) {
             dis.readFully(bTemp, 0, 1);
             for (int j = totalBytes - 2; j >= 0; j--)
@@ -67,9 +64,9 @@ final class BITalinoSocket {
             f = BITalinoFrameDecoder.decode(buffer, analogChannels.length,
                 totalBytes);
           }
-          elapsed = System.currentTimeMillis() - start;
-          System.out.println("Recovered in " + elapsed + " ms");
         }
+        final long elapsed = System.currentTimeMillis() - start;
+        System.out.println("Sample frame decoded in " + elapsed + " ms");
         frames[sampleCounter] = f;
         sampleCounter++;
       }
