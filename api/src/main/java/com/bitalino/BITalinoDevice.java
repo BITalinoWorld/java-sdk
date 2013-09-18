@@ -12,12 +12,14 @@
  */
 package com.bitalino;
 
+import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
+import java.nio.ByteBuffer;
 
 /**
- * This class represents a BITalino device.
+ * This class represents a BITalino device and provides methods to interact with
+ * it.
  */
 public class BITalinoDevice {
   private final int[] analogChannels;
@@ -58,17 +60,16 @@ public class BITalinoDevice {
   }
 
   /**
-   * Connect to BITalino device through Bluetooth identified with the provided
-   * MAC address provided.
+   * Provided that you've connected to BITalino through Bluetooth, open
+   * corresponding streams.
    * <p>
-   * In case the connection is successfully established, let's automatically the
-   * samplerate in the device.
+   * If everything goes smoothly, let's automatically the samplerate in the
+   * device.
    */
   public void open(final InputStream is, final OutputStream os)
       throws BITalinoException {
-    // connect to bluetooth device
     try {
-      socket = new BITalinoSocket(is, os);
+      socket = new BITalinoSocket(new DataInputStream(is), os);
       Thread.sleep(2000);
     } catch (Exception e) {
       e.printStackTrace(System.err);
@@ -101,8 +102,10 @@ public class BITalinoDevice {
 
   /**
    * Starts reading predefined analog channels.
+   * 
+   * @throws BITalinoException
    */
-  public void start() throws Throwable {
+  public void start() throws BITalinoException {
     int bit = 1;
     for (int channel : analogChannels)
       bit = bit | 1 << (2 + channel);
@@ -152,15 +155,14 @@ public class BITalinoDevice {
   public String version() throws BITalinoException {
     try {
       socket.write(7);
-      byte[] version = new byte[30];
-      String test = "";
-      int bytesRead = 0;
-      while (!test.equals("\n")) {
-        socket.getInputStream().read(version, bytesRead, 1);
-        bytesRead++;
-        test = new String(new byte[] { version[bytesRead - 1] });
-      }
-      return new String(Arrays.copyOf(version, bytesRead));
+      ByteBuffer buffer = ByteBuffer.allocate(30);
+      // read until '\n' arrives
+      byte b = 0;
+      while ((char) (b = (byte) socket.getInputStream().read()) != '\n')
+        buffer.put(b);
+      // return a minified array
+      buffer.flip();
+      return new String(buffer.array());
     } catch (Exception e) {
       throw new BITalinoException(BITalinoErrorTypes.LOST_COMMUNICATION);
     }
