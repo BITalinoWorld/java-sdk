@@ -175,7 +175,7 @@ public class BITalinoDevice {
    * Reads data from Bluetooth.
    * 
    * @param numberOfSamples
-   * @return
+   * @return an array of {@link BITalinoFrame} with numberOfSamples positions.
    * @throws BITalinoException
    */
   public BITalinoFrame[] read(final int numberOfSamples)

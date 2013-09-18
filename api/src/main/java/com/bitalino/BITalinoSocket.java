@@ -43,8 +43,6 @@ final class BITalinoSocket {
 
       // parse frames
       while (sampleCounter < numberOfSamples) {
-        System.out.println("Reading sample " + sampleCounter);
-        final long start = System.currentTimeMillis();
         // read number_bytes from buffer
         dis.readFully(buffer, 0, totalBytes);
         // let's try to decode the buffer
@@ -65,8 +63,6 @@ final class BITalinoSocket {
                 totalBytes);
           }
         }
-        final long elapsed = System.currentTimeMillis() - start;
-        System.out.println("Sample frame decoded in " + elapsed + " ms");
         frames[sampleCounter] = f;
         sampleCounter++;
       }
