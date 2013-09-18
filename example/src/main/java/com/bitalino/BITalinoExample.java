@@ -12,10 +12,13 @@
  */
 package com.bitalino;
 
+import java.io.FileWriter;
 import java.util.logging.Logger;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
+
+import com.google.gson.Gson;
 
 /**
  * Example on how to work with BITalino from Java.
@@ -50,13 +53,22 @@ public class BITalinoExample {
 
     // start acquisition on predefined analog channels
     device.start();
-    
+
     // read n samples
-    final int numberOfSamplesToRead = 10;
+    final int numberOfSamplesToRead = 20;
+    BITalinoFrame[] samplesRead = new BITalinoFrame[numberOfSamplesToRead];
+    final String logFile = "bitalino_log.json";
+    final FileWriter fileWriter = new FileWriter(logFile);
     logger.info("Reading " + numberOfSamplesToRead + " samples..");
-    BITalinoFrame[] frames = device.read(numberOfSamplesToRead);
-    for (BITalinoFrame frame : frames)
-      logger.info("FRAME: " + frame.toString());
+    for (int counter = 0; counter < numberOfSamplesToRead; counter++) {
+      final BITalinoFrame[] frames = device.read(1);
+      samplesRead[counter] = frames[0];
+      logger.info("FRAME: " + frames[0].toString());
+      Thread.sleep(1000);
+    }
+    fileWriter.write(new Gson().toJson(samplesRead));
+    fileWriter.close();
+    logger.info("Generated " + logFile + " with frames encoded into JSON.");
 
     // trigger digital outputs
     // int[] digital = { 1, 1, 1, 1 };
@@ -65,5 +77,4 @@ public class BITalinoExample {
     // stop acquisition and close bluetooth connection
     device.stop();
   }
-
 }
