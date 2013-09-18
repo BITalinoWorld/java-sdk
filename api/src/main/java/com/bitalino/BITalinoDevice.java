@@ -12,43 +12,31 @@
  */
 package com.bitalino;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-
-import javax.microedition.io.Connector;
-import javax.microedition.io.StreamConnection;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * This class represents a BITalino device.
  */
 public class BITalinoDevice {
   private final int[] analogChannels;
-  private final String mac;
   private final int samplerate;
   private final int totalBytes;
 
-  private StreamConnection conn = null;
-  private DataInputStream dis = null;
-  private DataOutputStream dos = null;
+  private BITalinoSocket socket = null;
 
   /**
-   * @param mac
-   *          device's MAC address.
    * @param samplerate
    *          the sampling frequency (Hz). Values available are 1000 (default),
    *          100, 10 and 1.
    * @param analogChannels
    *          the analog channels set to read from.
    * @throws BITalinoException
-   *           if MAC address is invalid.
+   *           if analog channels are not valid.
    */
-  public BITalinoDevice(final String mac, final int samplerate,
-      final int[] analogChannels) throws BITalinoException {
-    // validate MAC address
-    if (!mac.matches("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$"))
-      throw new BITalinoException(BITalinoErrorTypes.MACADDRESS_NOT_VALID);
-    this.mac = mac.replace(":", "");
-
+  public BITalinoDevice(final int samplerate, final int[] analogChannels)
+      throws BITalinoException {
     // validate samplerate
     this.samplerate = samplerate != 1 && samplerate != 10 && samplerate != 100
         && samplerate != 1000 ? 1000 : this.samplerate;
@@ -76,13 +64,11 @@ public class BITalinoDevice {
    * In case the connection is successfully established, let's automatically the
    * samplerate in the device.
    */
-  public void open() throws BITalinoException {
+  public void open(final InputStream is, final OutputStream os)
+      throws BITalinoException {
     // connect to bluetooth device
     try {
-      conn = (StreamConnection) Connector.open("btspp://" + mac + ":1",
-          Connector.READ_WRITE);
-      dis = conn.openDataInputStream();
-      dos = conn.openDataOutputStream();
+      socket = new BITalinoSocket(is, os);
       Thread.sleep(2000);
     } catch (Exception e) {
       e.printStackTrace(System.err);
@@ -107,7 +93,7 @@ public class BITalinoDevice {
         break;
       }
       command = (command << 6) | 0x03;
-      write(command);
+      socket.write(command);
     } catch (Exception e) {
       throw new BITalinoException(BITalinoErrorTypes.SAMPLING_RATE_NOT_DEFINED);
     }
@@ -121,7 +107,7 @@ public class BITalinoDevice {
     for (int channel : analogChannels)
       bit = bit | 1 << (2 + channel);
     try {
-      write(bit);
+      socket.write(bit);
     } catch (Exception e) {
       throw new BITalinoException(BITalinoErrorTypes.BT_DEVICE_NOT_CONNECTED);
     }
@@ -135,7 +121,7 @@ public class BITalinoDevice {
    */
   public void stop() throws BITalinoException {
     try {
-      write(0);
+      socket.write(0);
       Thread.sleep(2000);
       close();
     } catch (Exception e) {
@@ -150,26 +136,34 @@ public class BITalinoDevice {
    */
   private void close() throws BITalinoException {
     try {
-      dis.close();
-      dos.close();
-      conn.close();
+      socket.close();
     } catch (Exception e) {
       throw new BITalinoException(BITalinoErrorTypes.BT_DEVICE_NOT_CONNECTED);
     } finally {
-      conn = null;
-      dis = null;
-      dos = null;
+      socket = null;
     }
   }
 
   /**
-   * Writes data to Bluetooth.
-   * 
-   * @param command
-   * @throws BITalinoException
+   * Retrieve device's version.
+   * <p>
+   * <strong>ATTENTION:</strong> Works only in idle mode!
    */
-  private void write(final int command) throws BITalinoException {
-    BITalinoFrameCodec.write(dos, command);
+  public String version() throws BITalinoException {
+    try {
+      socket.write(7);
+      byte[] version = new byte[30];
+      String test = "";
+      int bytesRead = 0;
+      while (!test.equals("\n")) {
+        socket.getInputStream().read(version, bytesRead, 1);
+        bytesRead++;
+        test = new String(new byte[] { version[bytesRead - 1] });
+      }
+      return new String(Arrays.copyOf(version, bytesRead));
+    } catch (Exception e) {
+      throw new BITalinoException(BITalinoErrorTypes.LOST_COMMUNICATION);
+    }
   }
 
   /**
@@ -181,30 +175,7 @@ public class BITalinoDevice {
    */
   public BITalinoFrame[] read(final int numberOfSamples)
       throws BITalinoException {
-    return BITalinoFrameCodec.read(dis, numberOfSamples, analogChannels,
-        totalBytes);
-  }
-
-  /**
-   * Retrieve device's version.
-   * <p>
-   * <strong>ATTENTION:</strong> Works only in idle mode!
-   */
-  public String version() throws BITalinoException {
-    try {
-      write(7);
-      byte[] version = new byte[30];
-      String test = "";
-      int i = 0;
-      while (!test.equals("\n")) {
-        dis.read(version, i, 1);
-        i++;
-        test = new String(new byte[] { version[i - 1] });
-      }
-      return new String(version);
-    } catch (Exception e) {
-      throw new BITalinoException(BITalinoErrorTypes.LOST_COMMUNICATION);
-    }
+    return socket.read(analogChannels, totalBytes, numberOfSamples);
   }
 
 }
