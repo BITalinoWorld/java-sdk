@@ -14,6 +14,9 @@ package com.bitalino;
 
 import java.util.logging.Logger;
 
+import javax.microedition.io.Connector;
+import javax.microedition.io.StreamConnection;
+
 /**
  * Example on how to work with BITalino from Java.
  */
@@ -22,15 +25,22 @@ public class BITalinoExample {
   private static final Logger logger = Logger.getLogger(BITalinoExample.class
       .getName());
 
-  public static void main(String[] args) throws Throwable {
+  private static final String MAC = "20:13:08:08:15:83";
 
-    final String mac = "20:13:08:08:15:83";
+  public static void main(String[] args) throws Throwable {
+    // validate MAC address
+    // if (!mac.matches("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$"))
+    // throw new BITalinoException(BITalinoErrorTypes.MACADDRESS_NOT_VALID);
+    final String mac = MAC.replace(":", "");
+
     final int samplerate = 1000;
     final int[] analogs = { 0 };
-    BITalinoDevice device = new BITalinoDevice(mac, samplerate, analogs);
+    BITalinoDevice device = new BITalinoDevice(samplerate, analogs);
 
     // connect to BITalino device
-    device.open();
+    final StreamConnection conn = (StreamConnection) Connector.open("btspp://"
+        + mac + ":1", Connector.READ_WRITE);
+    device.open(conn.openInputStream(), conn.openOutputStream());
 
     // get BITalino version
     logger.info("VERSION: " + device.version());
@@ -44,7 +54,7 @@ public class BITalinoExample {
       logger.info("FRAME: " + frame.toString());
 
     // trigger digital outputs
-    int[] digital = { 1, 1, 1, 1 };
+    // int[] digital = { 1, 1, 1, 1 };
     // device.trigger(digital);
 
     // stop acquisition and close bluetooth connection
