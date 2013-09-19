@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 
   <groupId>com.bitalino</groupId>
   <artifactId>bitalino</artifactId>
@@ -8,7 +15,7 @@
   <packaging>pom</packaging>
 
   <name>Bitalino Java SDK</name>
-  <description>Bitalino Java API and a sample Java app</description>
+  <description>Bitalino Java SDK</description>
   <url>https://github.com/pires/bitalino-java-sdk</url>
 
   <licenses>
@@ -37,47 +44,26 @@
     </developer>
   </developers>
 
+  <distributionManagement>
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <name>Sonatype OSS Staging</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
+    <snapshotRepository>
+      <id>sonatype-nexus-snapshot</id>
+      <name>Sonatype OSS Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.6</java.version>
-    <bluecove.version>2.1.1-SNAPSHOT</bluecove.version>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>pyx4j-web-snapshot</id>
-      <url>http://repository.pyx4j.com/maven2-snapshot</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>net.sf.bluecove</groupId>
-        <artifactId>bluecove</artifactId>
-        <version>${bluecove.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>net.sf.bluecove</groupId>
-        <artifactId>bluecove-gpl</artifactId>
-        <version>${bluecove.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>net.sf.bluecove</groupId>
-        <artifactId>bluecove-emu</artifactId>
-        <version>${bluecove.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.code.gson</groupId>
-        <artifactId>gson</artifactId>
-        <version>2.2.4</version>
-      </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
