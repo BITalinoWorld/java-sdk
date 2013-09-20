@@ -12,7 +12,7 @@ Bitalino Java SDK derived from code available from the official website, BITalin
 <dependency>
   <groupId>com.bitalino</groupId>
   <artifactId>bitalino-api</groupId>
-  <version>0.4</version>
+  <version>0.4.1</version>
 </dependency>
 ```
 
