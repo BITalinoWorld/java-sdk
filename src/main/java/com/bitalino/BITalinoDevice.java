@@ -44,7 +44,7 @@ public class BITalinoDevice {
       throws BITalinoException {
     // validate samplerate
     this.samplerate = samplerate != 1 && samplerate != 10 && samplerate != 100
-        && samplerate != 1000 ? 1000 : this.samplerate;
+        && samplerate != 1000 ? 1000 : samplerate;
 
     // validate analog channels length
     if (analogChannels.length < 1 || analogChannels.length > 6)
@@ -99,7 +99,8 @@ public class BITalinoDevice {
       command = (command << 6) | 0x03;
       socket.write(command);
     } catch (Exception e) {
-      throw new BITalinoException(BITalinoErrorTypes.SAMPLING_RATE_NOT_DEFINED);
+      e.printStackTrace(System.err);
+      throw new BITalinoException(BITalinoErrorTypes.LOST_COMMUNICATION);
     }
   }
 
