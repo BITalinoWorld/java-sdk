@@ -10,11 +10,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.bitalino;
+package com.bitalino.comm;
 
 public class BITalinoException extends java.lang.Exception {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 3850110443125871497L;
 
   private final int code;
 

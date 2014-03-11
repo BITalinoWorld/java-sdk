@@ -10,7 +10,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.bitalino;
+package com.bitalino.comm;
 
 import java.io.DataInputStream;
 import java.io.InputStream;
@@ -19,12 +19,12 @@ import java.nio.ByteBuffer;
 
 /**
  * This class represents a BITalino device and provides methods to interact with
- * it.
+ * said device.
  */
 public class BITalinoDevice {
-  
+
   private static final long SLEEP = 500;
-  
+
   private final int[] analogChannels;
   private final int samplerate;
   private final int totalBytes;
@@ -36,7 +36,7 @@ public class BITalinoDevice {
    *          the sampling frequency (Hz). Values available are 1000 (default),
    *          100, 10 and 1.
    * @param analogChannels
-   *          the analog channels set to read from.
+   *          the analog channels to read from.
    * @throws BITalinoException
    *           if analog channels are not valid.
    */
@@ -48,12 +48,11 @@ public class BITalinoDevice {
 
     // validate analog channels length
     if (analogChannels.length < 1 || analogChannels.length > 6)
-      throw new BITalinoException(BITalinoErrorTypes.ANALOG_CHANNELS_NOT_VALID);
+      throw new BITalinoException(BITalinoErrorTypes.INVALID_ANALOG_CHANNELS);
     // validate analog channels identifiers
     for (int channel : analogChannels)
       if (channel < 0 || channel > 5)
-        throw new BITalinoException(
-            BITalinoErrorTypes.ANALOG_CHANNELS_NOT_VALID);
+        throw new BITalinoException(BITalinoErrorTypes.INVALID_ANALOG_CHANNELS);
     this.analogChannels = analogChannels;
 
     // calculate totalBytes based on number of used analog channels
@@ -63,11 +62,11 @@ public class BITalinoDevice {
   }
 
   /**
-   * Provided that you've connected to BITalino through Bluetooth, open
+   * Provided that a valid connection to BITalino is established, open
    * corresponding streams.
    * <p>
-   * If everything goes smoothly, let's automatically the samplerate in the
-   * device.
+   * If everything goes smoothly, automatically set the <tt>samplerate</tt> in
+   * the device.
    */
   public void open(final InputStream is, final OutputStream os)
       throws BITalinoException {
@@ -105,7 +104,7 @@ public class BITalinoDevice {
   }
 
   /**
-   * Starts reading predefined analog channels.
+   * Starts acquisition of predefined analog channels.
    * 
    * @throws BITalinoException
    */
@@ -122,7 +121,7 @@ public class BITalinoDevice {
   }
 
   /**
-   * Stop BITalino acquisition.
+   * Stops acquisition.
    * 
    * @throws BITalinoException
    */
@@ -137,7 +136,7 @@ public class BITalinoDevice {
   }
 
   /**
-   * Closes Bluetooth connection and releases any open resources.
+   * Closes socket and releases any open resources.
    * 
    * @throws BITalinoException
    */
@@ -152,7 +151,7 @@ public class BITalinoDevice {
   }
 
   /**
-   * Retrieve device's version.
+   * Retrieves device version.
    * <p>
    * <strong>ATTENTION:</strong> Works only in idle mode!
    */
@@ -173,7 +172,7 @@ public class BITalinoDevice {
   }
 
   /**
-   * Reads data from Bluetooth.
+   * Reads data from open socket.
    * 
    * @param numberOfSamples
    * @return an array of {@link BITalinoFrame} with numberOfSamples positions.

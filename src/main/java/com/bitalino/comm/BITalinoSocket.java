@@ -10,7 +10,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.bitalino;
+package com.bitalino.comm;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Abstract socket.
+ * Abstract socket implementation that implements BITalino I/O streams handling.
  */
 final class BITalinoSocket {
 
@@ -34,7 +34,7 @@ final class BITalinoSocket {
   }
 
   /**
-   * Reads data from Bluetooth.
+   * Reads data from open socket, if any.
    * 
    * @param numberOfSamples
    *          the number of samples to read
@@ -85,7 +85,7 @@ final class BITalinoSocket {
   }
 
   /**
-   * Writes data to Bluetooth.
+   * Writes data to socket.
    * 
    * @param command
    * @throws BITalinoException

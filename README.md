@@ -1,23 +1,38 @@
-bitalino-java-sdk
-======================================
+[Bitalino](http://www.bitalino.com) Java SDK
+=============================================
 
-Bitalino Java SDK derived from code available from the official website, BITalino.com.
+Here you'll find the BITalino protocol and utilities meant to write to/read from BITalino devices.
 
-## Prerequisites ##
-- JDK 6 or 7
+Note that the physical link (i.e. Bluetooth connection) management however, is not included, since it's OS-dependent.
+
+This SDK has been test both in [Java (Windows, Mac and Linux)](https://github.com/bitalino/bitalino-java-example) and [Android](https://github.com/bitalino/bitalino-android-example) applications.
+
+## Prerequisites
+- JDK 6 or newer
 - Maven 3.1.0 or newer
 
-## Maven ##
+## Build
+
+```
+mvn clean install
+```
+
+## Usage
+
+### Maven
+
 ```
 <dependency>
   <groupId>com.bitalino</groupId>
-  <artifactId>bitalino-api</groupId>
-  <version>0.4.2</version>
+  <artifactId>bitalino-java-sdk</groupId>
+  <version>1.0</version>
 </dependency>
 ```
 
-## Tested on ##
-- Ubuntu 12.04+ with OpenJDK 7 64-bit
-- MacOS X 10.7.5 with Oracle JDK 1.7.0_40 64-bit
-- Windows 7 with Oracle JDK 1.7.0_02 64-bit 
-- Also, the library has been tested on Android 4.3 (Galaxy Nexus)
+### Gradle
+
+```
+dependencies {
+  compile 'com.bitalino:bitalino-java-sdk:1.0'
+}
+```

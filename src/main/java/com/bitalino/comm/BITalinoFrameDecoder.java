@@ -10,7 +10,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.bitalino;
+package com.bitalino.comm;
 
 import java.io.IOException;
 
@@ -62,29 +62,24 @@ final class BITalinoFrameDecoder {
         case 5:
           frame.setAnalog(5, (buffer[j - 7] & 0x3F));
         case 4:
-
           frame
               .setAnalog(
                   4,
                   (((buffer[j - 6] & 0x0F) << 2) | ((buffer[j - 7] & 0xc0) >> 6)) & 0x3f);
         case 3:
-
           frame
               .setAnalog(
                   3,
                   (((buffer[j - 5] & 0x3F) << 4) | ((buffer[j - 6] & 0xf0) >> 4)) & 0x3ff);
         case 2:
-
           frame
               .setAnalog(
                   2,
                   (((buffer[j - 4] & 0xff) << 2) | (((buffer[j - 5] & 0xc0) >> 6))) & 0x3ff);
         case 1:
-
           frame.setAnalog(1,
               (((buffer[j - 2] & 0x3) << 8) | (buffer[j - 3]) & 0xff) & 0x3ff);
         case 0:
-
           frame
               .setAnalog(
                   0,
@@ -96,7 +91,7 @@ final class BITalinoFrameDecoder {
       }
       return frame;
     } catch (Exception e) {
-      throw new BITalinoException(BITalinoErrorTypes.INCORRECT_DECODE);
+      throw new BITalinoException(BITalinoErrorTypes.DECODE_INVALID_DATA);
     }
   }
 
