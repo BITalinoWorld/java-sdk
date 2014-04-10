@@ -58,8 +58,7 @@ final class BITalinoSocket {
         // read number_bytes from buffer
         dis.readFully(buffer, 0, totalBytes);
         // let's try to decode the buffer
-        BITalinoFrame f = BITalinoFrameDecoder.decode(buffer,
-            analogChannels.length, totalBytes);
+        BITalinoFrame f = BITalinoFrameDecoder.decode(buffer, analogChannels, totalBytes);
         // if CRC isn't valid, sequence equals -1
         if (f.getSequence() == -1) {
           // we're missing data, so let's wait and try to rebuild the buffer or
@@ -71,8 +70,7 @@ final class BITalinoSocket {
             for (int j = totalBytes - 2; j >= 0; j--)
               buffer[j + 1] = buffer[j];
             buffer[0] = bTemp[0];
-            f = BITalinoFrameDecoder.decode(buffer, analogChannels.length,
-                totalBytes);
+            f = BITalinoFrameDecoder.decode(buffer, analogChannels, totalBytes);
           }
         }
         frames[sampleCounter] = f;

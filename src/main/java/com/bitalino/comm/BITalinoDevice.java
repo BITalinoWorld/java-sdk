@@ -16,6 +16,7 @@ import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * This class represents a BITalino device and provides methods to interact with
@@ -53,6 +54,7 @@ public class BITalinoDevice {
     for (int channel : analogChannels)
       if (channel < 0 || channel > 5)
         throw new BITalinoException(BITalinoErrorTypes.INVALID_ANALOG_CHANNELS);
+    Arrays.sort(analogChannels);
     this.analogChannels = analogChannels;
 
     // calculate totalBytes based on number of used analog channels

@@ -26,7 +26,7 @@ final class BITalinoFrameDecoder {
    * @return decoded {@link BITalinoFrame}
    */
   public static BITalinoFrame decode(final byte[] buffer,
-      final int totalAnalogs, final int totalBytes) throws IOException,
+      final int[] analogChannels, final int totalBytes) throws IOException,
       BITalinoException {
 
     try {
@@ -58,33 +58,31 @@ final class BITalinoFrameDecoder {
         frame.setDigital(3, (buffer[j - 1] >> 4) & 0x01);
 
         // parse buffer frame
-        switch (totalAnalogs - 1) {
-        case 5:
-          frame.setAnalog(5, (buffer[j - 7] & 0x3F));
-        case 4:
+        if (totalBytes >= 3)
           frame
               .setAnalog(
-                  4,
-                  (((buffer[j - 6] & 0x0F) << 2) | ((buffer[j - 7] & 0xc0) >> 6)) & 0x3f);
-        case 3:
-          frame
-              .setAnalog(
-                  3,
-                  (((buffer[j - 5] & 0x3F) << 4) | ((buffer[j - 6] & 0xf0) >> 4)) & 0x3ff);
-        case 2:
-          frame
-              .setAnalog(
-                  2,
-                  (((buffer[j - 4] & 0xff) << 2) | (((buffer[j - 5] & 0xc0) >> 6))) & 0x3ff);
-        case 1:
-          frame.setAnalog(1,
-              (((buffer[j - 2] & 0x3) << 8) | (buffer[j - 3]) & 0xff) & 0x3ff);
-        case 0:
-          frame
-              .setAnalog(
-                  0,
+                  analogChannels[0],
                   (((buffer[j - 1] & 0xF) << 6) | ((buffer[j - 2] & 0XFC) >> 2)) & 0x3ff);
-        }
+        if (totalBytes >= 4)
+          frame.setAnalog(analogChannels[1],
+              (((buffer[j - 2] & 0x3) << 8) | (buffer[j - 3]) & 0xff) & 0x3ff);
+        if (totalBytes >= 6)
+          frame
+              .setAnalog(
+                  analogChannels[2],
+                  (((buffer[j - 4] & 0xff) << 2) | (((buffer[j - 5] & 0xc0) >> 6))) & 0x3ff);
+        if (totalBytes >= 7)
+          frame
+              .setAnalog(
+                  analogChannels[3],
+                  (((buffer[j - 5] & 0x3F) << 4) | ((buffer[j - 6] & 0xf0) >> 4)) & 0x3ff);
+        if (totalBytes >= 8)
+          frame
+              .setAnalog(
+                  analogChannels[4],
+                  (((buffer[j - 6] & 0x0F) << 2) | ((buffer[j - 7] & 0xc0) >> 6)) & 0x3f);
+        if (totalBytes == 11)
+          frame.setAnalog(analogChannels[5], (buffer[j - 7] & 0x3F));
       } else {
         frame = new BITalinoFrame();
         frame.setSequence(-1);
