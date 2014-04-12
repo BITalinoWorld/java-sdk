@@ -8,7 +8,7 @@ Note that the physical link (i.e. Bluetooth connection) management however, is n
 This SDK has been test both in [Java (Windows, Mac and Linux)](https://github.com/bitalino/bitalino-java-example) and [Android](https://github.com/bitalino/bitalino-android-example) applications.
 
 ## Prerequisites
-- JDK 6 or newer
+- JDK 7 or newer
 - Maven 3.1.0 or newer
 
 ## Build
