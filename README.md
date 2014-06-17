@@ -1,4 +1,4 @@
-[Bitalino](http://www.bitalino.com) Java SDK
+[BITalino](http://www.bitalino.com) Java SDK
 =============================================
 
 Here you'll find the BITalino protocol and utilities meant to write to/read from BITalino devices.
