@@ -74,11 +74,10 @@ final class BITalinoSocket {
             buffer[0] = bTemp[0];
             f = BITalinoFrameDecoder.decode(buffer, analogChannels, totalBytes);
           }
-        } else if (f.getSequence() != (prevSeq+1)%16){
-          System.out.println("Sequence out of order.")
+        } else if (f.getSequence() != (prevSeq+1)%16) {
+          System.out.println("Sequence out of order.");
         }
         prevSeq = f.getSequence();
-        
         
         frames[sampleCounter] = f;
         sampleCounter++;
