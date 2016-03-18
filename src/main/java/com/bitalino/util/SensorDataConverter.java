@@ -130,8 +130,8 @@ public class SensorDataConverter {
    * @param port
    * @return the resolution (maximum value) for a certain port.
    */
-  private static final int getResolution(final int port) {
-    return port < 4 ? 1023 : 63;
+  private static final double getResolution(final int port) {
+    return (double) port < 4 ? 1023 : 63;
   }
 
 }
