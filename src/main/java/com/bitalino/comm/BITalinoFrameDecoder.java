@@ -57,7 +57,8 @@ final class BITalinoFrameDecoder {
         frame.setDigital(2, (buffer[j - 1] >> 5) & 0x01);
         frame.setDigital(3, (buffer[j - 1] >> 4) & 0x01);
 
-        // MODIFIED by sveinpg.
+        // parse buffer frame
+        
         if (analogChannels.length >= 1)
           frame.setAnalog(
                   analogChannels[0],
