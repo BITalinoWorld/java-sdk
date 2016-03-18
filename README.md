@@ -25,7 +25,7 @@ mvn clean install
 <dependency>
   <groupId>com.bitalino</groupId>
   <artifactId>bitalino-java-sdk</groupId>
-  <version>1.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
@@ -33,6 +33,6 @@ mvn clean install
 
 ```
 dependencies {
-  compile 'com.bitalino:bitalino-java-sdk:1.0'
+  compile 'com.bitalino:bitalino-java-sdk:1.0.1'
 }
 ```
