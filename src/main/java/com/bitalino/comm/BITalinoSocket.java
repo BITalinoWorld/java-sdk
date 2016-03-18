@@ -25,12 +25,14 @@ final class BITalinoSocket {
 
   private DataInputStream dis;
   private OutputStream os;
+  private int prevSeq; 
 
   public BITalinoSocket(final DataInputStream is, final OutputStream os) {
     checkNotNull(is, "Input stream was not provided.");
     checkNotNull(os, "Output stream was not provided.");
     this.dis = is;
     this.os = os;
+    this.prevSeq = 15;
   }
 
   /**
@@ -72,7 +74,12 @@ final class BITalinoSocket {
             buffer[0] = bTemp[0];
             f = BITalinoFrameDecoder.decode(buffer, analogChannels, totalBytes);
           }
+        } else if (f.getSequence() != (prevSeq+1)%16){
+          System.out.println("Sequence out of order.")
         }
+        prevSeq = f.getSequence();
+        
+        
         frames[sampleCounter] = f;
         sampleCounter++;
       }
