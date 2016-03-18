@@ -11,3 +11,7 @@ bin
 .settings
 .project
 .classpath
+
+# Idea Intellij files #
+.idea
+*.iml
