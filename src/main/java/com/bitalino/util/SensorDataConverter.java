@@ -59,10 +59,10 @@ public class SensorDataConverter {
      *          the port where the <tt>raw</tt> value was read from.
      * @param raw
      *          the value read.
-     * @return a value ranging between -0 and 3mV
+     * @return a value ranging between -1.5 and 1.5mV
      */
     public static double scaleECG(final int port, final int raw) {
-        final double result = ((raw * VCC / getResolution(port)) / 1100) * 1000;
+        final double result = (((raw / getResolution(port) -0.5)*VCC) / 1100) * 1000;
         return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
@@ -101,7 +101,7 @@ public class SensorDataConverter {
      */
     public static double scaleAccelerometerWithPrecision(final int port,
                                                          final int raw, final int min, final int max) {
-        return 2 * ((raw - min) / (max - min)) - 1;
+        return 2 * ((double)(raw - min) / (max - min)) - 1;
     }
 
     /**
@@ -111,13 +111,17 @@ public class SensorDataConverter {
      *          the port where the <tt>raw</tt> value was read from.
      * @param raw
      *          the value read.
-     * @return a value ranging from 0 and 1uS (micro Siemens)
+     * @return  a value ranging from 1 and inf uS (micro Siemens),
+     *          beware might return Double.POSITIVE_INFINITY 
      */
     public static double scaleEDA(final int port, final int raw) {
         // need to round maximum value that otherwise is 1.05496875
-        final double result = raw * 1031.25 / 1000000;
-        return new BigDecimal(result).setScale(4, RoundingMode.HALF_UP)
+        final double ohm = 1 - ( (double)raw /(double)1023);
+       	double result = 1/ohm;
+        if (result != Double.POSITIVE_INFINITY)
+        	result = new BigDecimal(result).setScale(4, RoundingMode.HALF_UP)
                 .doubleValue();
+        return result;
     }
 
     /**
@@ -131,6 +135,65 @@ public class SensorDataConverter {
      */
     public static double scaleLuminosity(final int port, final int raw) {
         return 100 * (raw / getResolution(port));
+    }
+    
+        /**
+     * Temperature conversion.
+     *
+     * @param port
+     *          the port where the <tt>raw</tt> value was read from.
+     * @param raw
+     *          the value read.
+     * @param celsius
+     *          <tt>true</tt>:use celsius as metric,
+     *          <tt>false</tt>: fahrenheit is used.
+     * @return a value ranging between -40 and 125 Celsius (-40 and 257 Fahrenheit)
+     */
+    public static double scaleTMP(final int port, final int raw, boolean celsius){
+        double result = (((raw/getResolution(port))*VCC) - 0.5)*100;
+
+        if (!celsius)
+            // Convert to fahrenheit
+            result = result*((double)9/5) + 32;
+
+        return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
+    /**
+     * Respiration conversion.
+     *
+     * @param port
+     *          the port where the <tt>raw</tt> value was read from.
+     * @param raw
+     *          the value read.
+     * @return a value ranging between -50% and 50%
+     */
+    public static double scalePZT(final int port, final int raw){
+        double result =  ((raw/getResolution(port)) - 0.5)*100;
+        return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+
+    }
+
+    /**
+     * Electroencephalography conversion.
+     *
+     * @param port
+     *          the port where the <tt>raw</tt> value was read from.
+     * @param raw
+     *          the value read.
+     * @return a value ranging between -41.5 and 41.5 microvolt
+     */
+    public static double scaleEEG(final int port, final int raw){
+        double G_ECG = 40000; // sensor gain
+
+        // result rescaled to microvolt
+        double result = (((raw/getResolution(port))-0.5)*VCC)/G_ECG;
+        result = result*Math.pow(10, 6);
+
+        return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     /**
