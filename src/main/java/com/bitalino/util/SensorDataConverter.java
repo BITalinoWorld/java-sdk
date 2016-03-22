@@ -132,6 +132,65 @@ public class SensorDataConverter {
     public static double scaleLuminosity(final int port, final int raw) {
         return 100 * (raw / getResolution(port));
     }
+    
+        /**
+     * Temperature conversion.
+     *
+     * @param port
+     *          the port where the <tt>raw</tt> value was read from.
+     * @param raw
+     *          the value read.
+     * @param celsius
+     *          <tt>true</tt>:use celsius as metric,
+     *          <tt>false</tt>: fahrenheit is used.
+     * @return a value ranging between -40 and 125 Celsius (-40 and 257 Fahrenheit)
+     */
+    public static double scaleTMP(final int port, final int raw, boolean celsius){
+        double result = (((raw/getResolution(port))*VCC) - 0.5)*100;
+
+        if (!celsius)
+            // Convert to fahrenheit
+            result = result*((double)9/5) + 32;
+
+        return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
+    /**
+     * Respiration conversion.
+     *
+     * @param port
+     *          the port where the <tt>raw</tt> value was read from.
+     * @param raw
+     *          the value read.
+     * @return a value ranging between -50% and 50%
+     */
+    public static double scalePZT(final int port, final int raw){
+        double result =  ((raw/getResolution(port)) - 0.5)*100;
+        return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+
+    }
+
+    /**
+     * Electroencephalography conversion.
+     *
+     * @param port
+     *          the port where the <tt>raw</tt> value was read from.
+     * @param raw
+     *          the value read.
+     * @return a value ranging between -41.5 and 41.5 microvolt
+     */
+    public static double scaleEEG(final int port, final int raw){
+        double G_ECG = 40000; // sensor gain
+
+        // result rescaled to microvolt
+        double result = (((raw/getResolution(port))-0.5)*VCC)/G_ECG;
+        result = result*Math.pow(10, 6);
+
+        return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
 
     /**
      * Returns the resolution (maximum value) for a certain port.
