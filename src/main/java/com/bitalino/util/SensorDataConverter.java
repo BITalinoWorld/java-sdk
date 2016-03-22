@@ -59,10 +59,10 @@ public class SensorDataConverter {
      *          the port where the <tt>raw</tt> value was read from.
      * @param raw
      *          the value read.
-     * @return a value ranging between -0 and 3mV
+     * @return a value ranging between -1.5 and 1.5mV
      */
     public static double scaleECG(final int port, final int raw) {
-        final double result = ((raw * VCC / getResolution(port)) / 1100) * 1000;
+        final double result = (((raw / getResolution(port) -0.5)*VCC) / 1100) * 1000;
         return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
