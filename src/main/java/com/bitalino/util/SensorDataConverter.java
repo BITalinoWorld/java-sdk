@@ -111,13 +111,17 @@ public class SensorDataConverter {
      *          the port where the <tt>raw</tt> value was read from.
      * @param raw
      *          the value read.
-     * @return a value ranging from 0 and 1uS (micro Siemens)
+     * @return  a value ranging from 1 and inf uS (micro Siemens),
+     *          beware might return Double.POSITIVE_INFINITY 
      */
     public static double scaleEDA(final int port, final int raw) {
         // need to round maximum value that otherwise is 1.05496875
-        final double result = raw * 1031.25 / 1000000;
-        return new BigDecimal(result).setScale(4, RoundingMode.HALF_UP)
+        final double ohm = 1 - ( (double)raw /(double)1023);
+       	double result = 1/ohm;
+        if (result != Double.POSITIVE_INFINITY)
+        	result = new BigDecimal(result).setScale(4, RoundingMode.HALF_UP)
                 .doubleValue();
+        return result;
     }
 
     /**
