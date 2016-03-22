@@ -101,7 +101,7 @@ public class SensorDataConverter {
      */
     public static double scaleAccelerometerWithPrecision(final int port,
                                                          final int raw, final int min, final int max) {
-        return 2 * ((raw - min) / (max - min)) - 1;
+        return 2 * ((double)(raw - min) / (max - min)) - 1;
     }
 
     /**
