@@ -26,6 +26,7 @@ package com.bitalino.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
 
 /**
  * This class holds methods for converting/scaling raw data from BITalino
@@ -34,20 +35,27 @@ import java.math.RoundingMode;
 public class SensorDataConverter {
 
     private static final double VCC = 3.3; // volts
-    private static final int ACC_MIN = 185;
-    private static final int ACC_MAX = 275;
+    private static final int NBR_BITALINO_CHANNELS = 6;
+    private static final int EMG_GAIN = 1009;
+    private static final int ECG_GAIN = 1100;
+    private static final double EDA_SCALE_FACTOR = 0.132;
+    private static final int EEG_GAIN = 41782;
 
     /**
      * ElectroMyoGraphy conversion.
      *
      * @param port
      *          the port where the <tt>raw</tt> value was read from.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
-     * @return a value ranging between -1.65 and 1.65mV
+     * @return a value ranging between -1.64 and 1.64mV
      */
-    public static double scaleEMG(final int port, final int raw) {
-        final double result = (raw * VCC / getResolution(port) - VCC / 2);
+    public static double scaleEMG(final int port, final Integer[] activePorts, final int raw) {
+        final double result =
+                ((raw * VCC / getResolution(port, activePorts) - VCC / 2) * 1000) / EMG_GAIN;
         return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
@@ -57,12 +65,15 @@ public class SensorDataConverter {
      *
      * @param port
      *          the port where the <tt>raw</tt> value was read from.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
      * @return a value ranging between -1.5 and 1.5mV
      */
-    public static double scaleECG(final int port, final int raw) {
-        final double result = (((raw / getResolution(port) -0.5)*VCC) / 1100) * 1000;
+    public static double scaleECG(final int port, final Integer[] activePorts, final int raw) {
+        final double result = (((raw / getResolution(port, activePorts) - 0.5) * VCC) / ECG_GAIN) * 1000;
         return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
@@ -70,18 +81,20 @@ public class SensorDataConverter {
     /**
      * Accelerometer conversion based on reference calibration values. If you want
      * to acquire more precise values, use
-     * {@link #scaleAccelerometerWithPrecision(int, int, int, int)
+     * {@link #scaleAccelerometerWithPrecision(int, Integer[], int)
      * scaleAccelerometerWithPrecision} method.
      *
      * @param port
      *          the port where the <tt>raw</tt> value was read from.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
-     * @return a value ranging between -5 and 4.5Gs
+     * @return a value ranging between -3 and 3g
      */
-    public static double scaleAccelerometer(final int port, final int raw) {
-        final double result = scaleAccelerometerWithPrecision(port, raw, ACC_MIN,
-                ACC_MAX);
+    public static double scaleAccelerometer(final int port, final Integer[] activePorts, final int raw) {
+        final double result = scaleAccelerometerWithPrecision(port, activePorts, raw);
         return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
@@ -91,16 +104,17 @@ public class SensorDataConverter {
      *
      * @param port
      *          the port where the <tt>raw</tt> value was read from.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
-     * @param min
-     *          the calibration minimum value
-     * @param max
-     *          the calibration maximum value
-     * @return a value ranging between -3 and 3Gs
+     * @return a value ranging between -4.85 and 4.85g (6 bits) or between -4.85 and 4.99 (10 bits).
      */
-    public static double scaleAccelerometerWithPrecision(final int port,
-                                                         final int raw, final int min, final int max) {
+    public static double scaleAccelerometerWithPrecision(final int port, final Integer[] activePorts,
+                                                         final int raw) {
+        int min = getResolution(port, activePorts) == 1023 ? 400 : 25;
+        int max = getResolution(port, activePorts) == 1023 ? 608 : 38;
         return 2 * ((double)(raw - min) / (max - min)) - 1;
     }
 
@@ -109,19 +123,17 @@ public class SensorDataConverter {
      *
      * @param port
      *          the port where the <tt>raw</tt> value was read from.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
-     * @return  a value ranging from 1 and inf uS (micro Siemens),
-     *          beware might return Double.POSITIVE_INFINITY 
+     * @return  a value ranging from 0 to 25 uS (micro Siemens).
      */
-    public static double scaleEDA(final int port, final int raw) {
-        // need to round maximum value that otherwise is 1.05496875
-        final double ohm = 1 - ( (double)raw /(double)1023);
-       	double result = 1/ohm;
-        if (result != Double.POSITIVE_INFINITY)
-        	result = new BigDecimal(result).setScale(4, RoundingMode.HALF_UP)
+    public static double scaleEDA(final int port, final Integer[] activePorts, final int raw) {
+        final double result = ((raw / getResolution(port, activePorts)) * VCC) / EDA_SCALE_FACTOR;
+        return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
-        return result;
     }
 
     /**
@@ -129,12 +141,15 @@ public class SensorDataConverter {
      *
      * @param port
      *          the port where the <tt>raw</tt> value was read from.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
      * @return a value ranging from 0 and 100%.
      */
-    public static double scaleLuminosity(final int port, final int raw) {
-        return 100 * (raw / getResolution(port));
+    public static double scaleLuminosity(final int port, final Integer[] activePorts, final int raw) {
+        return 100 * (raw / getResolution(port, activePorts));
     }
     
         /**
@@ -142,15 +157,18 @@ public class SensorDataConverter {
      *
      * @param port
      *          the port where the <tt>raw</tt> value was read from.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
      * @param celsius
      *          <tt>true</tt>:use celsius as metric,
      *          <tt>false</tt>: fahrenheit is used.
-     * @return a value ranging between -40 and 125 Celsius (-40 and 257 Fahrenheit)
+     * @return a value ranging between -50 and 280 Celsius (-58 and 536 Fahrenheit)
      */
-    public static double scaleTMP(final int port, final int raw, boolean celsius){
-        double result = (((raw/getResolution(port))*VCC) - 0.5)*100;
+    public static double scaleTMP(final int port, final Integer[] activePorts, final int raw, boolean celsius){
+        double result = (((raw/getResolution(port, activePorts))*VCC) - 0.5)*100;
 
         if (!celsius)
             // Convert to fahrenheit
@@ -165,12 +183,15 @@ public class SensorDataConverter {
      *
      * @param port
      *          the port where the <tt>raw</tt> value was read from.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
      * @return a value ranging between -50% and 50%
      */
-    public static double scalePZT(final int port, final int raw){
-        double result =  ((raw/getResolution(port)) - 0.5)*100;
+    public static double scalePZT(final int port, final Integer[] activePorts, final int raw){
+        double result =  ((raw/getResolution(port, activePorts)) - 0.5)*100;
         return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
 
@@ -181,15 +202,16 @@ public class SensorDataConverter {
      *
      * @param port
      *          the port where the <tt>raw</tt> value was read from.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
-     * @return a value ranging between -41.5 and 41.5 microvolt
+     * @return a value ranging between -39.49 and 39.49 microvolt
      */
-    public static double scaleEEG(final int port, final int raw){
-        double G_ECG = 40000; // sensor gain
-
+    public static double scaleEEG(final int port, final Integer[] activePorts, final int raw){
         // result rescaled to microvolt
-        double result = (((raw/getResolution(port))-0.5)*VCC)/G_ECG;
+        double result = (((raw/getResolution(port, activePorts))-0.5)*VCC)/EEG_GAIN;
         result = result*Math.pow(10, 6);
 
         return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
@@ -203,10 +225,14 @@ public class SensorDataConverter {
      * From port 4 to 5, the resolution is 6-bit, thus 2^6 - 1 = 63.
      *
      * @param port
+     *          index of the port under analysis.
+     * @param activePorts
+     *          array containing the list of active <tt>ports</tt>, for example, when the 6
+     *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @return the resolution (maximum value) for a certain port.
      */
-    private static final double getResolution(final int port) {
-        return (double) port < 4 ? 1023 : 63;
+    private static final double getResolution(final int port, final Integer[] activePorts) {
+        return (double) activePorts.length > NBR_BITALINO_CHANNELS - 2 && Arrays.asList(activePorts).indexOf(port) < NBR_BITALINO_CHANNELS - 2 || activePorts.length <= NBR_BITALINO_CHANNELS - 2 ? 1023 : 63;
     }
 
 }
