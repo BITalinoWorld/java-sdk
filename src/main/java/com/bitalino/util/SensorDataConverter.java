@@ -91,7 +91,7 @@ public class SensorDataConverter {
      *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
-     * @return a value ranging between -3 and 3g
+     * @return a value ranging between -4.85 and 4.85g (6 bits) or between -4.85 and 4.99 (10 bits).
      */
     public static double scaleAccelerometer(final int port, final Integer[] activePorts, final int raw) {
         final double result = scaleAccelerometerWithPrecision(port, activePorts, raw);
@@ -188,10 +188,10 @@ public class SensorDataConverter {
      *          available ports are active the array should be {0, 1, 2, 3, 4, 5}.
      * @param raw
      *          the value read.
-     * @return a value ranging between -50% and 50%
+     * @return a value ranging between -1.65V and 1.65V
      */
     public static double scalePZT(final int port, final Integer[] activePorts, final int raw){
-        double result =  ((raw/getResolution(port, activePorts)) - 0.5)*100;
+        double result =  ((raw/getResolution(port, activePorts)) - 0.5)*VCC;
         return new BigDecimal(result).setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
 

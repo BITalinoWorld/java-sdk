@@ -102,12 +102,12 @@ public class SensorDataConverterTest {
 
     @Test
     public void test_pzt_conversion() {
-        assertEquals(SensorDataConverter.scalePZT(0, new Integer[]{0},0), -50.0);
-        assertEquals(SensorDataConverter.scalePZT(5, new Integer[]{1, 2, 3, 5},0), -50.0);
-        assertEquals(SensorDataConverter.scalePZT(5, new Integer[]{0, 1, 2, 3, 5},0), -50.0);
-        assertEquals(SensorDataConverter.scalePZT(5, new Integer[]{0, 1, 2, 3, 5}, 63),50.0);
-        assertEquals(SensorDataConverter.scalePZT(3, new Integer[]{0, 1, 2, 3, 5},1023),50.0);
-        assertEquals(SensorDataConverter.scalePZT(0, new Integer[]{0},1023), 50.0);
+        assertEquals(SensorDataConverter.scalePZT(0, new Integer[]{0},0), -1.65);
+        assertEquals(SensorDataConverter.scalePZT(5, new Integer[]{1, 2, 3, 5},0), -1.65);
+        assertEquals(SensorDataConverter.scalePZT(5, new Integer[]{0, 1, 2, 3, 5},0), -1.65);
+        assertEquals(SensorDataConverter.scalePZT(5, new Integer[]{0, 1, 2, 3, 5}, 63),1.65);
+        assertEquals(SensorDataConverter.scalePZT(3, new Integer[]{0, 1, 2, 3, 5},1023),1.65);
+        assertEquals(SensorDataConverter.scalePZT(0, new Integer[]{0},1023), 1.65);
     }
     
     @Test
